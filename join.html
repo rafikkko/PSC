@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Join | Professional Student Company</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 25px 10px;
+      border-bottom: 4px solid #2563eb;
+    }
+
+    header h1 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    header p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 10px 40px;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2563eb;
+    }
+
+    form {
+      display: grid;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 80px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 15px;
+      text-decoration: none;
+      color: #2563eb;
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Applicants list */
+    #applicants-list {
+      font-size: 14px;
+    }
+
+    .applicant {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 10px 0;
+    }
+
+    .applicant:last-child {
+      border-bottom: none;
+    }
+
+    .applicant strong {
+      color: #111827;
+    }
+
+    .small {
+      color: #6b7280;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Join the Professional Student Company</h1>
+    <p>Learn • Work • Earn • Enjoy</p>
+  </header>
+
+  <main>
+    <!-- FORM CARD -->
+    <div class="card">
+      <h2>Student Profile Form</h2>
+
+      <form id="join-form">
+        <div>
+          <label for="name">Full Name</label>
+          <input id="name" type="text" placeholder="Enter your full name" required />
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="example@student.com" required />
+        </div>
+
+        <div>
+          <label for="phone">Phone Number</label>
+          <input id="phone" type="tel" placeholder="+351 ... or +216 ..." />
+        </div>
+
+        <div>
+          <label for="skills">Skills</label>
+          <textarea id="skills" placeholder="Example: HTML, CSS, communication, Excel..."></textarea>
+        </div>
+
+        <div>
+          <label for="dreams">Your Dreams & Goals</label>
+          <textarea id="dreams" placeholder="Example: I want to be a developer or create my startup..."></textarea>
+        </div>
+
+        <div>
+          <label for="availability">Availability (hours per week)</label>
+          <input id="availability" type="number" min="1" max="60" placeholder="e.g. 10" />
+        </div>
+
+        <div>
+          <label for="paid">Looking for paid work?</label>
+          <select id="paid">
+            <option value="any">Any (experience or paid)</option>
+            <option value="paid-only">Paid only</option>
+            <option value="experience-only">Experience only</option>
+          </select>
+        </div>
+
+        <button type="submit">Submit Application</button>
+      </form>
+
+      <a href="index.html" class="back-link">← Back to Homepage</a>
+    </div>
+
+    <!-- LIST CARD -->
+    <div class="card">
+      <h2>Registered Professional Students</h2>
+      <p class="small">These profiles are stored only on this browser (localStorage).</p>
+      <div id="applicants-list"></div>
+    </div>
+  </main>
+
+  <script>
+    // Key used in localStorage
+    const STORAGE_KEY = "psc_applicants";
+
+    // Load existing applicants from localStorage
+    function loadApplicants() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+
+    // Save applicants array back to localStorage
+    function saveApplicants(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    // Render applicants list under the form
+    function renderApplicants() {
+      const container = document.getElementById("applicants-list");
+      const applicants = loadApplicants();
+
+      if (applicants.length === 0) {
+        container.innerHTML = "<p class='small'>No students registered yet.</p>";
+        return;
+      }
+
+      container.innerHTML = "";
+      applicants.forEach((a, index) => {
+        const div = document.createElement("div");
+        div.className = "applicant";
+        div.innerHTML = `
+          <strong>${index + 1}. ${a.name}</strong> – ${a.email}<br>
+          <span class="small">Phone:</span> ${a.phone || "N/A"}<br>
+          <span class="small">Skills:</span> ${a.skills || "N/A"}<br>
+          <span class="small">Dreams:</span> ${a.dreams || "N/A"}<br>
+          <span class="small">Availability:</span> ${a.availability || "N/A"} hours/week –
+          <span class="small">Type:</span> ${a.paid}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Handle form submit
+    document.getElementById("join-form").addEventListener("submit", function (e) {
+      e.preventDefault(); // stop page reload
+
+      // Read form values
+      const applicant = {
+        name: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        skills: document.getElementById("skills").value.trim(),
+        dreams: document.getElementById("dreams").value.trim(),
+        availability: document.getElementById("availability").value.trim(),
+        paid: document.getElementById("paid").value
+      };
+
+      // Basic validation
+      if (!applicant.name || !applicant.email) {
+        alert("Please fill at least your name and email.");
+        return;
+      }
+
+      // Load, push, save
+      const applicants = loadApplicants();
+      applicants.push(applicant);
+      saveApplicants(applicants);
+
+      // Clear form
+      this.reset();
+
+      // Re-render list
+      renderApplicants();
+
+      alert("Your application has been saved locally. ✅");
+    });
+
+    // Render list when page loads
+    renderApplicants();
+  </script>
+
+</body>
+</html>

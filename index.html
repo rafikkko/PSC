@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Professional Student Company</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, sans-serif; }
+    body { background: #f4f6fa; color: #222; line-height: 1.6; }
+
+    /* HEADER */
+    header {
+      background: #0f172a; color: #fff; padding: 20px 10%;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      border-bottom: 4px solid #2563eb;
+    }
+    .logo-box { display: flex; align-items: center; gap: 15px; }
+    .logo-box img { width: 80px; height: 80px; border-radius: 10px; object-fit: contain; background: #fff; padding: 5px; }
+    .logo-text h1 { font-size: 28px; margin-bottom: 4px; color: #fff; }
+    .logo-text h2 { font-size: 14px; font-weight: normal; color: #93c5fd; }
+    header p { width: 100%; text-align: center; font-style: italic; font-size: 14px; margin-top: 10px; opacity: 0.9; }
+
+    /* NAV */
+    nav { background: #1e293b; padding: 12px 10%; display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
+    nav a { color: #e5e7eb; text-decoration: none; font-size: 15px; transition: 0.2s; }
+    nav a:hover { color: #60a5fa; text-decoration: underline; }
+
+    /* MAIN */
+    main { padding: 30px 10%; }
+    section { margin-bottom: 35px; background: #ffffff; border-radius: 10px; padding: 24px;
+              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
+    section h2 { margin-bottom: 10px; font-size: 22px; color: #111827; }
+    section p { margin-bottom: 8px; font-size: 15px; }
+    ul { margin-left: 20px; font-size: 15px; margin-top: 6px; }
+    .highlight { font-weight: bold; color: #2563eb; }
+    .tagline { font-size: 14px; color: #9ca3af; }
+
+    /* JOIN BUTTON */
+    .join-btn {
+      display: block; margin: 25px auto 0; padding: 12px 24px;
+      background: #2563eb; color: #fff; border: none; border-radius: 6px;
+      font-size: 15px; cursor: pointer; transition: 0.3s;
+    }
+    .join-btn:hover { background: #1d4ed8; }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 20px 10%; font-size: 13px;
+             color: #6b7280; background: #f9fafb; border-top: 2px solid #e5e7eb; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo-box">
+      <img src="logo.png" alt="Professional Student Company Logo" />
+      <div class="logo-text">
+        <h1>Professional Student Company</h1>
+        <h2>Learn • Work • Earn • Enjoy</h2>
+      </div>
+    </div>
+    <p>"No one is better than me, they just got there before me."</p>
+  </header>
+
+  <nav>
+    <a href="#about">About</a>
+    <a href="#how">How It Works</a>
+    <a href="#internships">Internships</a>
+    <a href="#productivity">Productivity Zone</a>
+    <a href="#fun">Fun & Play</a>
+    <a href="join.html">Join Us</a>
+  </nav>
+
+  <main>
+    <section id="about">
+      <h2>About Professional Student Company</h2>
+      <p>
+        <span class="highlight">Professional Student Company</span> empowers students to study, gain experience, and grow
+        professionally while enjoying life.
+      </p>
+      <ul>
+        <li>Learn practical skills</li>
+        <li>Work on real projects</li>
+        <li>Earn while studying</li>
+        <li>Balance study and fun</li>
+      </ul>
+      <p class="tagline">Study smart, work hard, live fully.</p>
+    </section>
+
+    <section id="how">
+      <h2>How It Works</h2>
+      <ul>
+        <li>Join learning paths and real projects</li>
+        <li>Collaborate with companies and mentors</li>
+        <li>Gain experience that counts</li>
+        <li>Access free and paid opportunities</li>
+      </ul>
+      <p class="tagline">Professionalism starts before graduation.</p>
+    </section>
+
+    <section id="internships">
+      <h2>Internships & Real Projects</h2>
+      <ul>
+        <li>🌐 Web development & tech</li>
+        <li>📊 Business & marketing</li>
+        <li>🎨 Design & creativity</li>
+        <li>🧪 Engineering & innovation</li>
+      </ul>
+    </section>
+
+    <section id="productivity">
+      <h2>Productivity Zone</h2>
+      <ul>
+        <li>Find freelance or small projects</li>
+        <li>Learn productivity tools</li>
+        <li>Turn ideas into income</li>
+        <li>Collaborate on startups</li>
+      </ul>
+    </section>
+
+    <section id="fun">
+      <h2>Fun & Play Area</h2>
+      <p>Balance your life with fun and creativity.</p>
+      <ul>
+        <li>Mini games & quizzes</li>
+        <li>Challenges & meetups</li>
+        <li>Motivational content</li>
+      </ul>
+
+      <!-- JOIN BUTTON -->
+      <a href="join.html"><button class="join-btn">Join the Company →</button></a>
+    </section>
+  </main>
+
+  <footer>
+    Professional Student Company © 2025 — Learn • Work • Earn • Enjoy.
+  </footer>
+</body>
+</html>
