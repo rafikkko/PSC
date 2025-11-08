@@ -181,60 +181,43 @@
       <a href="index.html" class="back-link">← Back to Homepage</a>
     </div>
 
-    <!-- LIST CARD -->
+    <!-- LIST CARD (we’ll wire this to Firestore later) -->
     <div class="card">
       <h2>Registered Professional Students</h2>
-      <p class="small">These profiles are stored only on this browser (localStorage).</p>
+      <p class="small">
+        Profiles are stored online in Firebase. This list will be connected later.
+      </p>
       <div id="applicants-list"></div>
     </div>
   </main>
 
-  <script>
-    // Key used in localStorage
-    const STORAGE_KEY = "psc_applicants";
+  <!-- 🔥 Firebase + Firestore dynamic form -->
+  <script type="module">
+    // Import Firebase libraries from official CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // Load existing applicants from localStorage
-    function loadApplicants() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    }
+    // ✅ Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-n9LQ3tM4a1rPlFKptgSM6eif24wsckc",
+      authDomain: "professional-student-company.firebaseapp.com",
+      projectId: "professional-student-company",
+      storageBucket: "professional-student-company.firebasestorage.app",
+      messagingSenderId: "499526828377",
+      appId: "1:499526828377:web:53ee37e2d31c2bc4380c48",
+      measurementId: "G-CMRS0C3W04"
+    };
 
-    // Save applicants array back to localStorage
-    function saveApplicants(list) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    }
-
-    // Render applicants list under the form
-    function renderApplicants() {
-      const container = document.getElementById("applicants-list");
-      const applicants = loadApplicants();
-
-      if (applicants.length === 0) {
-        container.innerHTML = "<p class='small'>No students registered yet.</p>";
-        return;
-      }
-
-      container.innerHTML = "";
-      applicants.forEach((a, index) => {
-        const div = document.createElement("div");
-        div.className = "applicant";
-        div.innerHTML = `
-          <strong>${index + 1}. ${a.name}</strong> – ${a.email}<br>
-          <span class="small">Phone:</span> ${a.phone || "N/A"}<br>
-          <span class="small">Skills:</span> ${a.skills || "N/A"}<br>
-          <span class="small">Dreams:</span> ${a.dreams || "N/A"}<br>
-          <span class="small">Availability:</span> ${a.availability || "N/A"} hours/week –
-          <span class="small">Type:</span> ${a.paid}
-        `;
-        container.appendChild(div);
-      });
-    }
+    // Initialize Firebase + Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     // Handle form submit
-    document.getElementById("join-form").addEventListener("submit", function (e) {
-      e.preventDefault(); // stop page reload
+    const form = document.getElementById("join-form");
 
-      // Read form values
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
       const applicant = {
         name: document.getElementById("name").value.trim(),
         email: document.getElementById("email").value.trim(),
@@ -242,31 +225,24 @@
         skills: document.getElementById("skills").value.trim(),
         dreams: document.getElementById("dreams").value.trim(),
         availability: document.getElementById("availability").value.trim(),
-        paid: document.getElementById("paid").value
+        paid: document.getElementById("paid").value,
+        createdAt: serverTimestamp()
       };
 
-      // Basic validation
       if (!applicant.name || !applicant.email) {
         alert("Please fill at least your name and email.");
         return;
       }
 
-      // Load, push, save
-      const applicants = loadApplicants();
-      applicants.push(applicant);
-      saveApplicants(applicants);
-
-      // Clear form
-      this.reset();
-
-      // Re-render list
-      renderApplicants();
-
-      alert("Your application has been saved locally. ✅");
+      try {
+        await addDoc(collection(db, "applications"), applicant);
+        alert("✅ Your application has been sent successfully!");
+        form.reset();
+      } catch (err) {
+        console.error("❌ Error adding document:", err);
+        alert("Error while sending your application. Try again later.");
+      }
     });
-
-    // Render list when page loads
-    renderApplicants();
   </script>
 
 </body>
