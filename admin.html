@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PSC Admin – Applications</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root { --brand:#2563eb; --bg:#f5f7fb; --ink:#0f172a; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: "Segoe UI", Arial, sans-serif; background:var(--bg); color:#111827; }
+    header { background:#0f172a; color:#fff; padding:20px; border-bottom:4px solid var(--brand); }
+    header h1 { margin:0 0 6px; font-size:22px; }
+    header p { margin:0; opacity:.8; font-size:13px; }
+    main { max-width:1100px; margin:28px auto; padding:0 12px 40px; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.08); padding:18px; }
+    .toolbar { display: grid; grid-template-columns: 1fr auto auto auto; gap:10px; margin-bottom:14px; }
+    .toolbar input, .toolbar select, .toolbar button {
+      border:1px solid #d1d5db; border-radius:8px; padding:10px 12px; font-size:14px; background:#fff;
+    }
+    .toolbar button { background:var(--brand); color:#fff; border:none; cursor:pointer; }
+    .toolbar button.secondary { background:#fff; color:#111; border:1px solid #d1d5db; }
+    .toolbar button:hover { filter:brightness(0.96); }
+    table { width:100%; border-collapse: collapse; overflow: auto; }
+    thead th { position:sticky; top:0; background:#eef2ff; text-align:left; font-size:13px; padding:10px; border-bottom:1px solid #e5e7eb; }
+    tbody td { font-size:13px; padding:10px; border-bottom:1px solid #f1f5f9; vertical-align:top; }
+    .muted { color:#6b7280; }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#f1f5f9; }
+    .paid-any { background:#e0f2fe; }
+    .paid-only { background:#dcfce7; }
+    .exp-only { background:#fee2e2; }
+    .footer { margin-top:10px; font-size:12px; color:#6b7280; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Professional Student Company — Admin</h1>
+    <p>Live applications from Firestore (read-only dashboard)</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search name, email, skills, dreams…" />
+        <select id="filterPaid">
+          <option value="">Filter: Any type</option>
+          <option value="paid-only">Paid only</option>
+          <option value="experience-only">Experience only</option>
+          <option value="any">Any (experience or paid)</option>
+        </select>
+        <button id="refreshBtn" title="Refresh data">Refresh</button>
+        <button id="exportBtn" class="secondary" title="Download CSV">Export CSV</button>
+      </div>
+
+      <div style="overflow:auto; border:1px solid #e5e7eb; border-radius:10px;">
+        <table id="appsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name / Email</th>
+              <th>Phone</th>
+              <th>Skills</th>
+              <th>Dreams</th>
+              <th>Availability</th>
+              <th>Type</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="8" class="muted" style="text-align:center; padding:18px;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer">
+        Tip: use the search box to quickly filter any column. Data updates when you click Refresh.
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase Admin Reader (client) -->
+  <script type="module">
+    // 1) Firebase imports (CDN)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // 2) Your Firebase config (same as join.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-n9LQ3tM4a1rPlFKptgSM6eif24wsckc",
+      authDomain: "professional-student-company.firebaseapp.com",
+      projectId: "professional-student-company",
+      storageBucket: "professional-student-company.firebasestorage.app",
+      messagingSenderId: "499526828377",
+      appId: "1:499526828377:web:53ee37e2d31c2bc4380c48",
+      measurementId: "G-CMRS0C3W04"
+    };
+
+    // 3) Init
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // Elements
+    const tbody = document.getElementById("tbody");
+    const searchInput = document.getElementById("search");
+    const filterPaid = document.getElementById("filterPaid");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const exportBtn = document.getElementById("exportBtn");
+
+    let rawRows = [];   // all rows from Firestore
+    let viewRows = [];  // filtered rows currently shown
+
+    const fmt = (v) => (v ?? "").toString().trim();
+    const safe = (v) => (v ? v.replace(/\s+/g," ") : "");
+    const tag = (paid) => {
+      if (paid === "paid-only") return `<span class="tag paid-only">Paid only</span>`;
+      if (paid === "experience-only") return `<span class="tag exp-only">Experience only</span>`;
+      return `<span class="tag paid-any">Any</span>`;
+    };
+    const formatDate = (ts) => {
+      try {
+        if (!ts) return "";
+        const date = ts.toDate ? ts.toDate() : new Date(ts);
+        return date.toLocaleString();
+      } catch { return ""; }
+    };
+
+    function render(rows) {
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="muted" style="text-align:center; padding:18px;">No applications yet.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map((r,i)=> `
+        <tr>
+          <td>${i+1}</td>
+          <td>
+            <strong>${safe(r.name)}</strong><br>
+            <span class="muted">${safe(r.email)}</span>
+          </td>
+          <td>${safe(r.phone)}</td>
+          <td>${safe(r.skills)}</td>
+          <td>${safe(r.dreams)}</td>
+          <td>${safe(r.availability)}</td>
+          <td>${tag(r.paid)}</td>
+          <td>${formatDate(r.createdAt)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function applyFilters() {
+      const q = searchInput.value.toLowerCase().trim();
+      const paid = filterPaid.value;
+      viewRows = rawRows.filter(r => {
+        const inPaid = paid ? (r.paid === paid) : true;
+        const blob = `${r.name} ${r.email} ${r.phone} ${r.skills} ${r.dreams}`.toLowerCase();
+        const inSearch = q ? blob.includes(q) : true;
+        return inPaid && inSearch;
+      });
+      render(viewRows);
+    }
+
+    async function loadData() {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:18px;">Loading…</td></tr>`;
+      try {
+        let qRef;
+        try {
+          qRef = query(collection(db, "applications"), orderBy("createdAt", "desc"));
+        } catch {
+          qRef = collection(db, "applications");
+        }
+        const snap = await getDocs(qRef);
+        rawRows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        applyFilters();
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="8" style="color:#b91c1c; padding:18px;">
+          Error loading data. Open the browser console for details.
+        </td></tr>`;
+      }
+    }
+
+    function exportCSV() {
+      const headers = ["Name","Email","Phone","Skills","Dreams","Availability","Paid","CreatedAt"];
+      const rows = viewRows.map(r => [
+        fmt(r.name), fmt(r.email), fmt(r.phone), fmt(r.skills), fmt(r.dreams),
+        fmt(r.availability), fmt(r.paid), formatDate(r.createdAt)
+      ]);
+      const csv = [headers, ...rows].map(row =>
+        row.map(v => `"${(v||"").replace(/"/g,'""')}"`).join(",")
+      ).join("\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `psc-applications-${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // Events
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("filterPaid").addEventListener("change", applyFilters);
+    document.getElementById("refreshBtn").addEventListener("click", loadData);
+    document.getElementById("exportBtn").addEventListener("click", exportCSV);
+
+    // Initial load
+    loadData();
+  </script>
+</body>
+</html>
